@@ -46,15 +46,43 @@ def build_data(rows):
 
     active = [r for r in rows if not r["removed_on"]]
 
-    # Prijsklasse verdeling (huidig actief aanbod)
+    # Prijsklasse verdeling (huidig actief aanbod) + gemiddelde kilometerstand per klasse
     price_counts = defaultdict(int)
+    price_km_sum = defaultdict(int)
+    price_km_count = defaultdict(int)
     for r in active:
-        price_counts[bucket_label(r["price"])] += 1
+        label = bucket_label(r["price"])
+        price_counts[label] += 1
+        if r["mileage"] is not None:
+            price_km_sum[label] += r["mileage"]
+            price_km_count[label] += 1
     # sorteer op ondergrens van de klasse (onbekend laatste)
     def sort_key(label):
         return (9_999_999,) if label == "onbekend" else (int(label.split("k")[0].replace("€", "")),)
     price_labels = sorted(price_counts.keys(), key=sort_key)
     price_values = [price_counts[l] for l in price_labels]
+    price_avg_km = [
+        round(price_km_sum[l] / price_km_count[l]) if price_km_count[l] else None
+        for l in price_labels
+    ]
+
+    # Variant-verdeling (Long Range / Performance / RWD / AWD / Standard Range)
+    variant_counts = defaultdict(int)
+    variant_price_sum = defaultdict(int)
+    variant_price_count = defaultdict(int)
+    for r in active:
+        v = r["variant"] or "Onbekend"
+        variant_counts[v] += 1
+        if r["price"] is not None:
+            variant_price_sum[v] += r["price"]
+            variant_price_count[v] += 1
+    variant_order = ["Long Range", "Performance", "RWD", "AWD", "Standard Range", "Onbekend"]
+    variant_labels = [v for v in variant_order if variant_counts.get(v)]
+    variant_values = [variant_counts[v] for v in variant_labels]
+    variant_avg_price = [
+        round(variant_price_sum[v] / variant_price_count[v]) if variant_price_count[v] else None
+        for v in variant_labels
+    ]
 
     # Nieuwe advertenties per dag, laatste 30 dagen
     daily_new = defaultdict(int)
@@ -89,6 +117,10 @@ def build_data(rows):
     return {
         "price_labels": price_labels,
         "price_values": price_values,
+        "price_avg_km": price_avg_km,
+        "variant_labels": variant_labels,
+        "variant_values": variant_values,
+        "variant_avg_price": variant_avg_price,
         "daily_labels": last_30_days,
         "daily_values": daily_values,
         "weekly_labels": week_keys,
@@ -135,8 +167,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <div class="chart-box">
-    <h2>Aanbod per prijsklasse (huidig)</h2>
+    <h2>Aanbod per prijsklasse (huidig) + gemiddelde km-stand</h2>
     <canvas id="priceChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h2>Aanbod per variant (Long Range / Performance / RWD / AWD)</h2>
+    <canvas id="variantChart"></canvas>
   </div>
 
   <div class="chart-box">
@@ -158,9 +195,40 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 const data = {data_json};
 
 new Chart(document.getElementById('priceChart'), {{
+  data: {{
+    labels: data.price_labels,
+    datasets: [
+      {{ type: 'bar', label: 'Aantal auto\\'s', data: data.price_values, backgroundColor: '#38bdf8', yAxisID: 'y' }},
+      {{ type: 'line', label: 'Gem. km-stand', data: data.price_avg_km, borderColor: '#fbbf24', backgroundColor: '#fbbf24', yAxisID: 'y1', tension: 0.2 }}
+    ]
+  }},
+  options: {{
+    scales: {{
+      y: {{ position: 'left', title: {{ display: true, text: 'Aantal auto\\'s' }} }},
+      y1: {{ position: 'right', title: {{ display: true, text: 'Gem. km-stand' }}, grid: {{ drawOnChartArea: false }} }}
+    }}
+  }}
+}});
+
+new Chart(document.getElementById('variantChart'), {{
   type: 'bar',
-  data: {{ labels: data.price_labels, datasets: [{{ label: 'Aantal auto\\'s', data: data.price_values, backgroundColor: '#38bdf8' }}] }},
-  options: {{ plugins: {{ legend: {{ display:false }} }} }}
+  data: {{
+    labels: data.variant_labels,
+    datasets: [{{ label: 'Aantal auto\\'s', data: data.variant_values, backgroundColor: '#f472b6' }}]
+  }},
+  options: {{
+    plugins: {{
+      legend: {{ display:false }},
+      tooltip: {{
+        callbacks: {{
+          afterLabel: function(ctx) {{
+            const avg = data.variant_avg_price[ctx.dataIndex];
+            return avg ? 'Gem. prijs: €' + avg.toLocaleString('nl-NL') : '';
+          }}
+        }}
+      }}
+    }}
+  }}
 }});
 
 new Chart(document.getElementById('dailyChart'), {{
