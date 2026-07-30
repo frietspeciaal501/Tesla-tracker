@@ -1,1 +1,40 @@
+name: Tesla Model Y tracker
+
+on:
+  schedule:
+    # Draait elke dag om 06:00 UTC (± 07:00-08:00 Nederlandse tijd)
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repo uitchecken
+        uses: actions/checkout@v4
+
+      - name: Python installeren
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Dependencies installeren
+        run: pip install -r requirements.txt
+
+      - name: Aanbod scrapen
+        run: python scraper.py
+
+      - name: Rapport genereren
+        run: python analyze.py
+
+      - name: Resultaten committen
+        run: |
+          git config user.name "tesla-tracker-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add tesla_model_y.db docs/index.html
+          git commit -m "Dagelijkse update" || echo "Geen wijzigingen om te committen"
+          git push
 
