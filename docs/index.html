@@ -19,17 +19,22 @@
 </head>
 <body>
   <h1>🚗 Tesla Model Y aanbod — Nederland</h1>
-  <div class="meta">Gegenereerd op 2026-07-30T11:25 · Marktplaats + AutoTrack</div>
+  <div class="meta">Gegenereerd op 2026-07-30T15:24 · Marktplaats + AutoTrack</div>
 
   <div class="stats">
-    <div class="stat"><div class="num">291</div><div class="label">actief aanbod nu</div></div>
-    <div class="stat"><div class="num">291</div><div class="label">totaal ooit gezien</div></div>
-    <div class="stat"><div class="num">291</div><div class="label">actief op marktplaats</div></div>
+    <div class="stat"><div class="num">292</div><div class="label">actief aanbod nu</div></div>
+    <div class="stat"><div class="num">311</div><div class="label">totaal ooit gezien</div></div>
+    <div class="stat"><div class="num">292</div><div class="label">actief op marktplaats</div></div>
   </div>
 
   <div class="chart-box">
-    <h2>Aanbod per prijsklasse (huidig)</h2>
+    <h2>Aanbod per prijsklasse (huidig) + gemiddelde km-stand</h2>
     <canvas id="priceChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h2>Aanbod per variant (Long Range / Performance / RWD / AWD)</h2>
+    <canvas id="variantChart"></canvas>
   </div>
 
   <div class="chart-box">
@@ -48,12 +53,43 @@
   </div>
 
 <script>
-const data = {"price_labels": ["\u20ac25k - \u20ac30k", "\u20ac30k - \u20ac35k", "\u20ac35k - \u20ac40k", "\u20ac40k - \u20ac45k"], "price_values": [34, 141, 87, 29], "daily_labels": ["2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25", "2026-07-26", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30"], "daily_values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 291], "weekly_labels": ["2026-W31"], "weekly_values": [291], "active_over_time_labels": ["2026-07-30"], "active_over_time_values": [291], "total_active": 291, "total_ever_seen": 291, "generated_at": "2026-07-30T11:25", "by_source": {"marktplaats": 291}};
+const data = {"price_labels": ["\u20ac25k - \u20ac30k", "\u20ac30k - \u20ac35k", "\u20ac35k - \u20ac40k", "\u20ac40k - \u20ac45k"], "price_values": [93, 111, 60, 28], "price_avg_km": [44556, 62669, 76345, 57997], "variant_labels": ["Performance"], "variant_values": [292], "variant_avg_price": [33711], "daily_labels": ["2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25", "2026-07-26", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30"], "daily_values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 311], "weekly_labels": ["2026-W31"], "weekly_values": [311], "active_over_time_labels": ["2026-07-30"], "active_over_time_values": [292], "total_active": 292, "total_ever_seen": 311, "generated_at": "2026-07-30T15:24", "by_source": {"marktplaats": 292}};
 
 new Chart(document.getElementById('priceChart'), {
+  data: {
+    labels: data.price_labels,
+    datasets: [
+      { type: 'bar', label: 'Aantal auto\'s', data: data.price_values, backgroundColor: '#38bdf8', yAxisID: 'y' },
+      { type: 'line', label: 'Gem. km-stand', data: data.price_avg_km, borderColor: '#fbbf24', backgroundColor: '#fbbf24', yAxisID: 'y1', tension: 0.2 }
+    ]
+  },
+  options: {
+    scales: {
+      y: { position: 'left', title: { display: true, text: 'Aantal auto\'s' } },
+      y1: { position: 'right', title: { display: true, text: 'Gem. km-stand' }, grid: { drawOnChartArea: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('variantChart'), {
   type: 'bar',
-  data: { labels: data.price_labels, datasets: [{ label: 'Aantal auto\'s', data: data.price_values, backgroundColor: '#38bdf8' }] },
-  options: { plugins: { legend: { display:false } } }
+  data: {
+    labels: data.variant_labels,
+    datasets: [{ label: 'Aantal auto\'s', data: data.variant_values, backgroundColor: '#f472b6' }]
+  },
+  options: {
+    plugins: {
+      legend: { display:false },
+      tooltip: {
+        callbacks: {
+          afterLabel: function(ctx) {
+            const avg = data.variant_avg_price[ctx.dataIndex];
+            return avg ? 'Gem. prijs: €' + avg.toLocaleString('nl-NL') : '';
+          }
+        }
+      }
+    }
+  }
 });
 
 new Chart(document.getElementById('dailyChart'), {
