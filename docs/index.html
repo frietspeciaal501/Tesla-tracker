@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Tesla Model Y aanbod — rapport</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:24px; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .meta { color:#94a3b8; font-size:0.85rem; margin-bottom: 24px;}
+  .stats { display:flex; gap:16px; margin-bottom: 32px; flex-wrap:wrap; }
+  .stat { background:#1e293b; padding:16px 20px; border-radius:10px; min-width:140px; }
+  .stat .num { font-size:1.6rem; font-weight:700; color:#38bdf8; }
+  .stat .label { font-size:0.8rem; color:#94a3b8; }
+  .chart-box { background:#1e293b; border-radius:12px; padding:20px; margin-bottom:28px; }
+  .chart-box h2 { font-size:1.05rem; margin-top:0; }
+  canvas { max-height: 360px; }
+</style>
+</head>
+<body>
+  <h1>🚗 Tesla Model Y aanbod — Nederland</h1>
+  <div class="meta">Gegenereerd op 2026-07-30T11:25 · Marktplaats + AutoTrack</div>
+
+  <div class="stats">
+    <div class="stat"><div class="num">291</div><div class="label">actief aanbod nu</div></div>
+    <div class="stat"><div class="num">291</div><div class="label">totaal ooit gezien</div></div>
+    <div class="stat"><div class="num">291</div><div class="label">actief op marktplaats</div></div>
+  </div>
+
+  <div class="chart-box">
+    <h2>Aanbod per prijsklasse (huidig)</h2>
+    <canvas id="priceChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h2>Nieuwe advertenties per dag (laatste 30 dagen)</h2>
+    <canvas id="dailyChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h2>Nieuwe advertenties per week (laatste 12 weken)</h2>
+    <canvas id="weeklyChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h2>Totaal actief aanbod over tijd</h2>
+    <canvas id="totalChart"></canvas>
+  </div>
+
+<script>
+const data = {"price_labels": ["\u20ac25k - \u20ac30k", "\u20ac30k - \u20ac35k", "\u20ac35k - \u20ac40k", "\u20ac40k - \u20ac45k"], "price_values": [34, 141, 87, 29], "daily_labels": ["2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25", "2026-07-26", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30"], "daily_values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 291], "weekly_labels": ["2026-W31"], "weekly_values": [291], "active_over_time_labels": ["2026-07-30"], "active_over_time_values": [291], "total_active": 291, "total_ever_seen": 291, "generated_at": "2026-07-30T11:25", "by_source": {"marktplaats": 291}};
+
+new Chart(document.getElementById('priceChart'), {
+  type: 'bar',
+  data: { labels: data.price_labels, datasets: [{ label: 'Aantal auto\'s', data: data.price_values, backgroundColor: '#38bdf8' }] },
+  options: { plugins: { legend: { display:false } } }
+});
+
+new Chart(document.getElementById('dailyChart'), {
+  type: 'bar',
+  data: { labels: data.daily_labels, datasets: [{ label: 'Nieuwe advertenties', data: data.daily_values, backgroundColor: '#a78bfa' }] },
+  options: { plugins: { legend: { display:false } } }
+});
+
+new Chart(document.getElementById('weeklyChart'), {
+  type: 'bar',
+  data: { labels: data.weekly_labels, datasets: [{ label: 'Nieuwe advertenties', data: data.weekly_values, backgroundColor: '#34d399' }] },
+  options: { plugins: { legend: { display:false } } }
+});
+
+new Chart(document.getElementById('totalChart'), {
+  type: 'line',
+  data: { labels: data.active_over_time_labels, datasets: [{ label: 'Actief aanbod', data: data.active_over_time_values, borderColor: '#fbbf24', tension: 0.2 }] },
+  options: { plugins: { legend: { display:false } } }
+});
+</script>
+</body>
+</html>
